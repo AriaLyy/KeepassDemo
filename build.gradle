@@ -1,0 +1,85 @@
+// Top-level build file where you can add configuration options common to all sub-projects/modules.
+
+buildscript {
+  ext.kotlin_version = '1.4.30'
+  repositories {
+    // maven { url 'https://maven.aliyun.com/nexus/content/groups/public/' }
+    google()
+    jcenter()
+    //maven { url 'https://developer.huawei.com/repo/' }
+    maven { url 'https://jitpack.io' }
+  }
+  dependencies {
+    classpath 'com.android.tools.build:gradle:3.5.0'
+    classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+    // 资源文件混淆
+    classpath 'com.tencent.mm:AndResGuard-gradle-plugin:1.2.17'
+    // 腾讯多渠道打包工具：VasDolly
+    classpath 'com.leon.channel:plugin:2.0.3'
+    // 华为的
+    //classpath 'com.huawei.agconnect:agcp:1.2.1.301'
+  }
+}
+
+allprojects {
+  repositories {
+    //maven { url 'https://maven.aliyun.com/nexus/content/groups/public/' }
+    google()
+    jcenter()
+    // maven { url 'https://developer.huawei.com/repo/' }
+    maven { url 'https://jitpack.io' }
+    maven {
+      url 'https://pkgs.dev.azure.com/MicrosoftDeviceSDK/DuoSDK-Public/_packaging/Duo-SDK-Feed/maven/v1'
+    }
+  }
+}
+
+task clean(type: Delete) {
+  delete rootProject.buildDir
+}
+
+ext {
+  compileSdkVersion = 29
+  supportLibVersion = "27.1.1"
+  buildToolsVersion = "29.0.3" // https://developer.android.com/studio/releases/build-tools
+  targetSdkVersion = 29
+  minSdkVersion = 21
+  ndkVersion = '21.3.6528147'
+
+  lifecycleVersion = '2.3.0-rc01'
+  appcompatVersion = '1.2.0'
+  multidexVersion = "2.0.1"
+  materialVersion = '1.3.0-alpha04'
+  roomVersion = "2.2.3"
+  recyclerviewVersion = '1.1.0'
+  cardviewVersion = '1.0.0'
+  gsonVersion = '2.8.6'
+  // 约束布局
+  constraintlayoutVersion = '2.0.4'
+
+  // android Ktx
+  ktxVersion = '1.3.2'
+
+  retrofitVersion = "2.9.0"
+  okHttpVersion = "4.9.0"
+
+  // 协程
+  coroutinesVersion = '1.4.1'
+  // 富文本
+  richtextVerstion = '3.0.8'
+  // joda-time
+  jodaTimeVersion = '2.9.4'
+
+  // android组件
+  multidex = "androidx.multidex:multidex:$multidexVersion"
+
+  // 生物识别
+  biometricVersion = '1.0.1'
+
+  // 测试模块
+  junit = 'junit:junit:4.13.1'
+  runner = 'androidx.test:runner:1.3.0'
+  androidXJunit = 'androidx.test.ext:junit:1.1.2'
+  espresso = 'androidx.test.espresso:espresso-core:3.3.0'
+  androidXRules = 'androidx.test:rules:1.3.0'
+}
