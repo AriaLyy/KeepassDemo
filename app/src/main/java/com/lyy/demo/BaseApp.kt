@@ -10,9 +10,10 @@
 package com.lyy.demo
 
 import android.app.Application
+import androidx.multidex.MultiDexApplication
 import com.arialyy.frame.core.AbsFrame
 
-class BaseApp:Application() {
+class BaseApp:  MultiDexApplication() {
 
   override fun onCreate() {
     super.onCreate()

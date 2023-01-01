@@ -11,6 +11,10 @@ android {
     targetCompatibility JavaVersion.VERSION_1_8
   }
 
+  kotlinOptions {
+    jvmTarget = "1.8"
+  }
+
   defaultConfig {
     applicationId "com.kpa.demo"
     minSdkVersion rootProject.ext.minSdkVersion
@@ -18,19 +22,59 @@ android {
     versionCode 1
     versionName "1.0"
 
+    multiDexEnabled true
+    vectorDrawables.useSupportLibrary = true
+
     testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+
+    // so 版本
+    ndk.abiFilters 'armeabi-v7a', 'arm64-v8a', 'x86', 'x86_64'
+
+    //指定room.schemaLocation生成的文件路径，用于版本升级
+    javaCompileOptions {
+      annotationProcessorOptions {
+        arguments = ["room.schemaLocation": "$projectDir/schemas".toString()]
+      }
+    }
+    // 只保留以下语言包
+    resConfigs "zh-rCN", "zh-rTW", "en", "fr-rCA", "nb-rNO", "ru-rRU", "fr"
   }
 
-  dataBinding {
-    enabled = true
+//  dataBinding {
+//    enabled = true
+//  }
+  buildFeatures{
+    dataBinding = true
+    // for view binding :
+    // viewBinding = true
   }
 
   buildTypes {
+
+    debug {
+      debuggable = true
+      // 下面两个是debug-db的参数
+      resValue("string", "PORT_NUMBER", "10086") // 端口
+      resValue("string", "DB_PASSWORD_keepassA.db", "stVz7QxFgzA7yMnH") // sqlcipher 加密密码
+      consumerProguardFiles 'proguard-rules.pro'
+    }
+
     release {
       minifyEnabled false
       proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
     }
   }
+}
+
+
+boolean isReleaseBuildType(){
+  for(String s : gradle.startParameter.taskNames) {
+    println("builtType: " + s)
+    if (s.contains("Release") | s.contains("release") | s.contains("reBuildChannel")) {
+      return true
+    }
+  }
+  return false
 }
 
 // 替换AndroidManifest 参数
@@ -39,13 +83,17 @@ android.applicationVariants.all { variant ->
   variant.outputs.all { output ->
     output.processManifest.doLast {
       // Stores the path to the maifest.
-
-      String manifestPath = "${manifestOutputDirectory.asFile.get()}/AndroidManifest.xml"
+      String manifestPath = "${multiApkManifestOutputDirectory.asFile.get()}/AndroidManifest.xml"
+      println("版本类型：" + isReleaseBuildType())
+      def keyHash = "5qMkIKbIM5Lx7VbajX8mT3rKXpE="
+      if (isReleaseBuildType()){
+        keyHash = "xv3czaACtp98KvuSqP3GRLCxjrc="
+      }
 
       // 替换one drive 配置
       def updatedContent = file(manifestPath).getText('UTF-8')
-          .replaceAll("msal_package_name", "com.kpa.demo") // 包名
-          .replaceAll("msal_signature_hash", "5qMkIKbIM5Lx7VbajX8mT3rKXpE=") // 当前签名hash
+              .replaceAll("msal_package_name", "com.lyy.keepassa") // 包名
+              .replaceAll("msal_signature_hash", keyHash) // 当前签名hash
       file(manifestPath).write(updatedContent, 'UTF-8')
     }
   }
@@ -54,35 +102,160 @@ android.applicationVariants.all { variant ->
 dependencies {
   implementation fileTree(dir: 'libs', include: ['*.jar'])
   // 测试模块
+//  testImplementation rootProject.ext.junit
+//  androidTestImplementation rootProject.ext.runner
+//  androidTestImplementation rootProject.ext.androidXJunit
+//
+//  implementation 'me.laoyuyu.keepassa:KeepassIcon:0.2.6'
+//  implementation 'me.laoyuyu.keepassa:KeepassLib:0.2.6'
+//  implementation 'me.laoyuyu.keepassa:KPAFrame:0.2.6'
+//  implementation 'me.laoyuyu.keepassa:UIWidget:0.2.6'
+//
+//  // kotlin
+//  implementation "androidx.core:core-ktx:${rootProject.ext.ktxVersion}"
+//  implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:${rootProject.ext.coroutinesVersion}"
+//
+//  implementation "androidx.appcompat:appcompat:${rootProject.ext.appcompatVersion}"
+//  implementation "com.google.android.material:material:${rootProject.ext.materialVersion}"
+//  implementation "androidx.recyclerview:recyclerview:${rootProject.ext.recyclerviewVersion}"
+//  implementation "androidx.multidex:multidex:${rootProject.ext.multidexVersion}"
+//  implementation "androidx.cardview:cardview:${rootProject.ext.cardviewVersion}"
+//  implementation "androidx.constraintlayout:constraintlayout:${rootProject.ext.constraintlayoutVersion}"
+//  implementation "com.squareup.retrofit2:retrofit:${rootProject.ext.retrofitVersion}"
+//
+//  // 生物识别库，指纹，人脸识别
+//  implementation "androidx.biometric:biometric:${rootProject.ext.biometricVersion}"
+//
+//  // 加密工具，需要23版本
+//  //  implementation "androidx.security:security-crypto:1.0.0-rc01"
+//  implementation 'com.google.crypto.tink:tink-android:1.5.0'
+////  implementation 'com.microsoft.identity.client:msal:1.6+'
+//  implementation "com.zzhoujay.richtext:richtext:${rootProject.ext.richtextVerstion}"
+//  implementation 'com.microsoft.identity.client:msal:2.+'
+////  implementation 'com.microsoft.graph:microsoft-graph:1.5.+'
+
   testImplementation rootProject.ext.junit
   androidTestImplementation rootProject.ext.runner
   androidTestImplementation rootProject.ext.androidXJunit
+  androidTestImplementation rootProject.ext.espresso
+  androidTestImplementation rootProject.ext.androidXRules
 
-  implementation 'com.arialyy.keepassA:KeepassIcon:0.0.3'
-  implementation "com.arialyy.keepassA:KeepassLib:0.0.4"
-  implementation 'com.arialyy.keepassA:KPAFrame:0.0.5'
-  implementation 'com.arialyy.keepassA:UIWidget:0.0.3'
+  // keepassA组件
+  implementation 'me.laoyuyu.keepassa:KeepassIcon:0.2.6'
+  implementation 'me.laoyuyu.keepassa:KeepassLib:0.2.8'
+  implementation 'me.laoyuyu.keepassa:KPAFrame:0.2.14'
+  implementation 'me.laoyuyu.keepassa:UIWidget:0.2.7'
 
   // kotlin
+  implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:${rootProject.ext.kotlin_version}"
+  // kotlin 反射依赖
+  implementation "org.jetbrains.kotlin:kotlin-reflect:${rootProject.ext.kotlin_version}"
+  // Androidx 组件，包括了协程
   implementation "androidx.core:core-ktx:${rootProject.ext.ktxVersion}"
+  // 协程支持
   implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:${rootProject.ext.coroutinesVersion}"
 
+  // =========================== android 组件 start =====================================
   implementation "androidx.appcompat:appcompat:${rootProject.ext.appcompatVersion}"
   implementation "com.google.android.material:material:${rootProject.ext.materialVersion}"
   implementation "androidx.recyclerview:recyclerview:${rootProject.ext.recyclerviewVersion}"
   implementation "androidx.multidex:multidex:${rootProject.ext.multidexVersion}"
   implementation "androidx.cardview:cardview:${rootProject.ext.cardviewVersion}"
-  implementation "androidx.constraintlayout:constraintlayout:${rootProject.ext.constraintlayoutVersion}"
-  implementation "com.squareup.retrofit2:retrofit:${rootProject.ext.retrofitVersion}"
 
-  // 生物识别库，指纹，人脸识别
+  // lifecycle
+  implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:${rootProject.ext.lifecycleVersion}"
+  implementation "androidx.lifecycle:lifecycle-livedata-ktx:${rootProject.ext.lifecycleVersion}"
+  implementation "androidx.lifecycle:lifecycle-common-java8:${rootProject.ext.lifecycleVersion}"
+
+  // viewpager2
+  implementation "androidx.viewpager2:viewpager2:1.0.0"
+
+  // android 设置库
+  implementation "androidx.preference:preference-ktx:1.1.1"
+  // workmanager
+  def work_version = '2.4.0'
+//  implementation "androidx.work:work-runtime:$work_version"
+  implementation "androidx.work:work-runtime-ktx:$work_version"
+
+  // room
+  def room_version = '2.2.5'
+  //  implementation "androidx.room:room-runtime:$room_version"
+  kapt "androidx.room:room-compiler:$room_version"
+  implementation "androidx.room:room-ktx:$room_version" // ktx 扩展插件
+
+  implementation 'com.google.crypto.tink:tink-android:1.5.0'
+
+  // android 自动填充工具
+  implementation "androidx.autofill:autofill:1.0.0"
+
+  // 下拉刷新控件
+  implementation "androidx.swiperefreshlayout:swiperefreshlayout:1.1.0"
+
+  // 约束布局
+  implementation "androidx.constraintlayout:constraintlayout:${rootProject.ext.constraintlayoutVersion}"
+
+  // 生物特征识别
   implementation "androidx.biometric:biometric:${rootProject.ext.biometricVersion}"
 
-  // 加密工具，需要23版本
-  //  implementation "androidx.security:security-crypto:1.0.0-rc01"
-  implementation 'com.google.crypto.tink:tink-android:1.5.0'
-  implementation 'com.microsoft.identity.client:msal:1.6+'
+  // 取色板
+  // https://mvnrepository.com/artifact/androidx.palette/palette
+  implementation 'androidx.palette:palette-ktx:1.0.0'
+
+  // =========================== android 组件 end =====================================
+
+  // =========================== 三方库 start =====================================
+  implementation "joda-time:joda-time:${rootProject.ext.jodaTimeVersion}"
+  // 富文本
   implementation "com.zzhoujay.richtext:richtext:${rootProject.ext.richtextVerstion}"
-//  implementation 'com.microsoft.identity.client:msal:2.+'
+  // 开源许可对话框
+  implementation 'de.psdev.licensesdialog:licensesdialog:2.1.0'
+
+  // 状态栏
+  implementation 'com.gyf.immersionbar:immersionbar:3.0.0'
+  // 大图浏览
+  implementation 'com.davemorrissey.labs:subsampling-scale-image-view:3.10.0'
+  // eventbus
+  implementation 'org.greenrobot:eventbus:3.1.1'
+
+  // json 动画库
+  implementation 'com.airbnb.android:lottie:3.5.0'
+
+  // glide
+  implementation 'com.github.bumptech.glide:glide:4.11.0'
+  kapt 'com.github.bumptech.glide:compiler:4.11.0'
+  //  debugImplementation 'com.squareup.leakcanary:leakcanary-android:2.1' // 2.1 之后不需要再代码中初始化
+
+  // dropbox
+  implementation 'com.dropbox.core:dropbox-core-sdk:3.1.5'
+
+  // webdav
+  implementation 'com.thegrizzlylabs.sardine-android:sardine-android:0.6'
+
+  //wcdb 数据库加密
+  implementation 'com.tencent.wcdb:wcdb-android:1.0.8'
+  implementation 'com.tencent.wcdb:room:1.0.8' // 代替 room-runtime，同时也不需要再引用 wcdb-android
+
+  // 腾讯多渠道 VasDolly
+  implementation 'com.leon.channel:helper:2.0.3'
+
+  // XP/调试/多开/模拟器/root 判断
+  implementation 'com.lahm.library:easy-protector-release:latest.release'
+  // auto-size
+  implementation 'me.jessyan:autosize:1.2.1'
+
+  // bugly
+  implementation 'com.tencent.bugly:crashreport:latest.release'
+  implementation 'com.tencent.bugly:nativecrashreport:latest.release'
+  implementation "com.google.code.gson:gson:${rootProject.ext.gsonVersion}"
+
+//  implementation "androidx.asynclayoutinflater:asynclayoutinflater:${rootProject.ext.asynclayoutinflaterVersion}"
+  implementation 'me.weishu:free_reflection:3.0.1'
+
+  // onedrive
+//  implementation 'com.microsoft.identity.client:msal:1.6+'
+  implementation 'com.microsoft.identity.client:msal:2.+'
 //  implementation 'com.microsoft.graph:microsoft-graph:1.5.+'
+
+  implementation "com.squareup.retrofit2:retrofit:${rootProject.ext.retrofitVersion}"
+
 }

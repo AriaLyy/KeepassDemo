@@ -14,6 +14,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.View
+import android.webkit.WebView
 import android.widget.TextView
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -40,6 +41,8 @@ class MainActivity : AbsActivity<ActivityMainBinding>() {
     list.adapter = adapter
     list.layoutManager = LinearLayoutManager(this)
     list.setHasFixedSize(true)
+    Log.d(TAG, "fffff")
+    WebView(this)
     adapter.notifyDataSetChanged()
     RvItemClickSupport.addTo(list)
         .setOnItemClickListener { _, position, _ ->
