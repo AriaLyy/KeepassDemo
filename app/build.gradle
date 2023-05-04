@@ -141,10 +141,12 @@ dependencies {
   androidTestImplementation rootProject.ext.androidXRules
 
   // keepassA组件
-  implementation 'me.laoyuyu.keepassa:KeepassIcon:0.2.6'
-  implementation 'me.laoyuyu.keepassa:KeepassLib:0.2.8'
-  implementation 'me.laoyuyu.keepassa:KPAFrame:0.2.14'
-  implementation 'me.laoyuyu.keepassa:UIWidget:0.2.7'
+
+  implementation 'me.laoyuyu.keepassa:KeepassIcon:0.4.0'
+  implementation 'me.laoyuyu.keepassa:KeepassLib:0.4.0'
+  //  implementation project(path: ':KpaLib')
+  implementation 'me.laoyuyu.keepassa:KPAFrame:0.4.0'
+  implementation 'me.laoyuyu.keepassa:UIWidget:0.4.0'
 
   // kotlin
   implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:${rootProject.ext.kotlin_version}"
